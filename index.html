@@ -10,9 +10,9 @@ body { background: #f0f0f0; display: flex; align-items: center; justify-content:
 .wrap { background: white; width: 340px; padding: 1.4rem 1.2rem; border-radius: 20px; box-shadow: 0 6px 24px rgba(0,0,0,0.15); }
 .ch-name { text-align: center; font-size: 13px; color: #999; margin-bottom: 4px; }
 .theme { text-align: center; font-size: 18px; font-weight: 700; color: #111; margin-bottom: 5px; }
-.direction { text-align: center; font-size: 12px; color: #666; margin-bottom: 12px; letter-spacing: 1px; }
-.grid { display: grid; grid-template-columns: repeat(6, 52px); grid-template-rows: repeat(6, 52px); margin: 0 auto; width: 312px; }
-.cell { width: 52px; height: 52px; border: 2.5px solid #111; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: #111; background: white; transition: background 0.5s, color 0.5s; }
+.direction { text-align: center; font-size: 12px; color: #FF8C42; font-weight: 600; margin-bottom: 12px; letter-spacing: 1px; }
+.grid { display: grid; grid-template-columns: repeat(5, 56px); grid-template-rows: repeat(5, 56px); margin: 0 auto; width: 280px; }
+.cell { width: 56px; height: 56px; border: 2.5px solid #FF8C42; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: #111; background: #FFFAF6; transition: background 0.5s, color 0.5s; }
 .cell.c1 { background: #378ADD; color: white; }
 .cell.c2 { background: #1D9E75; color: white; }
 .cell.c3 { background: #E24B4A; color: white; }
@@ -28,7 +28,7 @@ body { background: #f0f0f0; display: flex; align-items: center; justify-content:
 .btn.new { background: #444444; }
 .btn.rev { background: #E24B4A; }
 .btn:disabled { background: #cccccc; cursor: default; }
-.like-area { text-align: center; margin-top: 16px; padding-top: 14px; border-top: 2px solid #f0f0f0; }
+.like-area { text-align: center; margin-top: 16px; padding-top: 14px; border-top: 2px solid #FFE8D6; }
 .like-btn { background: white; border: 2.5px solid #E24B4A; border-radius: 99px; padding: 10px 32px; font-size: 20px; cursor: pointer; color: #E24B4A; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; }
 .like-btn.on { background: #E24B4A; color: white; transform: scale(1.06); }
 .like-lbl { font-size: 12px; color: #aaa; margin-top: 6px; }
@@ -53,29 +53,39 @@ body { background: #f0f0f0; display: flex; align-items: center; justify-content:
 </div>
 
 <script>
-const S=6;
-const F=['약','밥','집','책','목','잡','칸','팔','벽','탁','막','각','학','작','착','딱','락','박','콩','팥','죽','쌀','국','떡','곱','탑','컵','삽','톱','솥','귀','뒤','쥐','취','튀','외','왜','위','의','볼','갑','납','답','잣','닷','맛','봇','솟','갓','낫','못','헛','뜻','빛'];
+const SIZE=5;
+const FILL=['나','가','다','라','마','바','사','아','자','차','타','파','하','가','나','다','라','마','바','사'];
 const TH=[
   {t:'🌸 봄 하면 생각나는 것',w:['벚꽃','개나리','나비']},
-  {t:'☀️ 여름 하면 생각나는 것',w:['수박','모기','해수욕장']},
+  {t:'☀️ 여름 하면 생각나는 것',w:['수박','모기','해수욕']},
   {t:'🍂 가을 하면 생각나는 것',w:['단풍','고구마','독서']},
-  {t:'❄️ 겨울 하면 생각나는 것',w:['눈사람','군고구마','패딩']},
+  {t:'❄️ 겨울 하면 생각나는 것',w:['눈사람','패딩','군밤']},
   {t:'🎉 명절 하면 생각나는 것',w:['송편','보름달','차례']},
-  {t:'🍚 밥상 위에 있는 것',w:['김치','된장찌개','숟가락']},
+  {t:'🍚 밥상 위에 있는 것',w:['김치','된장국','숟가락']},
   {t:'🏥 건강에 좋은 것',w:['운동','수면','채소']},
   {t:'🧠 치매예방에 좋은 것',w:['독서','운동','대화']},
-  {t:'🎵 노래방 가면 부르는 것',w:['트로트','마이크','박수']},
+  {t:'🎵 노래방 하면 생각나는 것',w:['트로트','마이크','박수']},
   {t:'🌊 바다 하면 생각나는 것',w:['갈매기','파도','조개']},
+  {t:'🎒 소풍 하면 생각나는 것',w:['도시락','김밥','돗자리']},
+  {t:'🏨 호텔 하면 생각나는 것',w:['뷔페','수영장','객실']},
+  {t:'🚌 버스 하면 생각나는 것',w:['정류장','교통카드','차창']},
+  {t:'🌸 결혼식 하면 생각나는 것',w:['부케','예식장','화환']},
+  {t:'☕ 카페 하면 생각나는 것',w:['케이크','커피잔','라떼']},
+  {t:'✈️ 공항 하면 생각나는 것',w:['여권','수하물','면세점']},
+  {t:'🎬 영화관 하면 생각나는 것',w:['팝콘','스크린','예매표']},
+  {t:'🏥 병원 하면 생각나는 것',w:['주사기','청진기','처방전']},
+  {t:'🌊 해수욕장 하면 생각나는 것',w:['튜브','파라솔','모래성']},
+  {t:'🎓 학교 하면 생각나는 것',w:['칠판','급식','교과서']},
 ];
 const C=['c1','c2','c3'],D=[[0,1],[1,0],[1,1],[1,-1]];
 let ti=0,g=[],pl=[],done=false,liked=false,likeCount=0;
-const ri=n=>Math.floor(Math.random()*n),fc=()=>F[ri(F.length)];
-const gz=i=>[{rn:0,rx:2,cn:0,cx:2},{rn:0,rx:2,cn:3,cx:5},{rn:3,rx:5,cn:0,cx:2},{rn:3,rx:5,cn:3,cx:5}][i%4];
+const ri=n=>Math.floor(Math.random()*n),fc=()=>FILL[ri(FILL.length)];
+const gz=i=>[{rn:0,rx:1,cn:0,cx:1},{rn:0,rx:1,cn:3,cx:4},{rn:3,rx:4,cn:0,cx:1},{rn:3,rx:4,cn:3,cx:4}][i%4];
 
 function cp(gr,w,r,c,dr,dc){
   for(let i=0;i<w.length;i++){
     const nr=r+dr*i,nc=c+dc*i;
-    if(nr<0||nr>=S||nc<0||nc>=S)return false;
+    if(nr<0||nr>=SIZE||nc<0||nc>=SIZE)return false;
     if(gr[nr][nc]!==''&&gr[nr][nc]!==w[i])return false;
   }
   return true;
@@ -91,7 +101,7 @@ function gen(){
 
   const th=TH[ti%TH.length];ti++;
   g=[];
-  for(let r=0;r<S;r++){g.push([]);for(let c=0;c<S;c++)g[r].push('');}
+  for(let r=0;r<SIZE;r++){g.push([]);for(let c=0;c<SIZE;c++)g[r].push('');}
   pl=[];
 
   const zo=[0,1,2,3].sort(()=>Math.random()-0.5);
@@ -109,7 +119,7 @@ function gen(){
     }
     if(!ok){
       for(let a=0;a<400&&!ok;a++){
-        const [dr,dc]=D[ri(D.length)],r=ri(S),c=ri(S);
+        const [dr,dc]=D[ri(D.length)],r=ri(SIZE),c=ri(SIZE);
         if(cp(g,word,r,c,dr,dc)){
           const cs=[];
           for(let i=0;i<word.length;i++){g[r+dr*i][c+dc*i]=word[i];cs.push([r+dr*i,c+dc*i]);}
@@ -119,7 +129,7 @@ function gen(){
     }
   }
 
-  for(let r=0;r<S;r++)for(let c=0;c<S;c++){
+  for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){
     if(!g[r][c]){
       let ch,t=0;
       do{ch=fc();t++;}
@@ -130,7 +140,7 @@ function gen(){
 
   document.getElementById('tt').textContent=th.t;
   const gr=document.getElementById('grid');gr.innerHTML='';
-  for(let r=0;r<S;r++)for(let c=0;c<S;c++){
+  for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){
     const d=document.createElement('div');
     d.className='cell';d.id=`c${r}_${c}`;d.textContent=g[r][c];
     gr.appendChild(d);
@@ -139,7 +149,7 @@ function gen(){
 
 function rev(){
   if(done)return;done=true;
-  document.getElementById('rb').disabled=true;
+  const rb=document.getElementById('rb');rb.disabled=true;
   const tw=document.getElementById('tags');tw.innerHTML='';
   pl.forEach(p=>{
     p.cs.forEach(([r,c])=>document.getElementById(`c${r}_${c}`).classList.add(p.col));
