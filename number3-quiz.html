@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>🧠 같은 숫자 3쌍 찾기 (세자리)</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #f5f5f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: Arial, sans-serif; }
+.wrap { background: white; width: 360px; padding: 1.4rem 1.2rem; border-radius: 20px; box-shadow: 0 6px 24px rgba(0,0,0,0.12); }
+.ch-name { text-align: center; font-size: 13px; color: #999; margin-bottom: 4px; }
+.title { text-align: center; font-size: 22px; font-weight: 700; color: #111; margin-bottom: 4px; }
+.title span { color: #E24B4A; }
+.subtitle { text-align: center; font-size: 13px; color: #666; margin-bottom: 14px; }
+.grid { display: grid; grid-template-columns: repeat(4, 78px); grid-template-rows: repeat(5, 66px); margin: 0 auto; width: 312px; }
+.cell { width: 78px; height: 66px; border: 2.5px solid #FF8C42; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: #111; background: #FFFAF6; transition: background 0.5s, color 0.5s; }
+.cell.f1 { background: #378ADD; color: white; }
+.cell.f2 { background: #1D9E75; color: white; }
+.cell.f3 { background: #E24B4A; color: white; }
+.msg { text-align: center; font-size: 13px; color: #1D9E75; font-weight: 700; min-height: 22px; margin-top: 10px; }
+.btn-row { display: flex; gap: 10px; margin-top: 12px; }
+.btn { flex: 1; padding: 14px; font-size: 15px; font-weight: 700; border-radius: 12px; cursor: pointer; border: none; color: white; transition: opacity 0.15s; }
+.btn:active { opacity: 0.85; }
+.btn.new { background: #444; }
+.btn.rev { background: #E24B4A; }
+.btn:disabled { background: #ccc; cursor: default; }
+.like-area { text-align: center; margin-top: 14px; padding-top: 12px; border-top: 2px solid #FFE8D6; }
+.like-btn { background: white; border: 2.5px solid #E24B4A; border-radius: 99px; padding: 10px 32px; font-size: 20px; cursor: pointer; color: #E24B4A; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; }
+.like-btn.on { background: #E24B4A; color: white; transform: scale(1.06); }
+.like-lbl { font-size: 12px; color: #aaa; margin-top: 6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="ch-name">🧠 치매예방 두뇌훈련</div>
+  <div class="title">같은 숫자 <span>3쌍</span> 찾기</div>
+  <div class="subtitle">숨어있는 같은 숫자 3쌍을 찾아보세요!</div>
+  <div class="grid" id="grid"></div>
+  <div class="msg" id="msg"></div>
+  <div class="btn-row">
+    <button class="btn new" onclick="gen()">🔄 새 문제</button>
+    <button class="btn rev" id="rb" onclick="rev()">✨ 정답 공개</button>
+  </div>
+  <div class="like-area">
+    <button class="like-btn" id="lb" onclick="lk()">❤️ <span id="lc">0</span></button>
+    <div class="like-lbl">재밌었다면 하트를 눌러주세요!</div>
+  </div>
+</div>
+
+<script>
+let pairs=[], nums=[], done=false, liked=false, likeCount=0;
+function ri(n){ return Math.floor(Math.random()*n); }
+
+function gen(){
+  done=false; liked=false;
+  document.getElementById('rb').disabled=false;
+  document.getElementById('msg').textContent='';
+  document.getElementById('lb').className='like-btn';
+
+  const pairNums=[];
+  while(pairNums.length<3){
+    const n=100+ri(900);
+    if(!pairNums.includes(n)) pairNums.push(n);
+  }
+  const others=[];
+  while(others.length<14){
+    const n=100+ri(900);
+    if(!pairNums.includes(n)&&!others.includes(n)) others.push(n);
+  }
+  nums=[...pairNums,...pairNums,...others];
+  for(let i=nums.length-1;i>0;i--){
+    const j=ri(i+1);
+    [nums[i],nums[j]]=[nums[j],nums[i]];
+  }
+  pairs=pairNums.map(p=>({
+    num:p,
+    cells:nums.reduce((a,v,i)=>{ if(v===p)a.push(i); return a; },[])
+  }));
+
+  const g=document.getElementById('grid');
+  g.innerHTML='';
+  nums.forEach((n,i)=>{
+    const d=document.createElement('div');
+    d.className='cell'; d.id='n'+i; d.textContent=n;
+    g.appendChild(d);
+  });
+}
+
+function rev(){
+  if(done)return; done=true;
+  document.getElementById('rb').disabled=true;
+  const c=['f1','f2','f3'];
+  pairs.forEach((p,pi)=>{
+    p.cells.forEach(i=>document.getElementById('n'+i).className='cell '+c[pi]);
+  });
+  document.getElementById('msg').textContent='😊 몇 쌍 찾으셨나요? 하트 눌러주세요!';
+}
+
+function lk(){
+  liked=!liked;
+  likeCount=liked?likeCount+1:Math.max(0,likeCount-1);
+  document.getElementById('lc').textContent=likeCount;
+  document.getElementById('lb').className='like-btn'+(liked?' on':'');
+  if(liked)document.getElementById('msg').textContent='❤️ 감사합니다! 구독도 눌러주세요 😊';
+}
+
+gen();
+</script>
+</body>
+</html>
