@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>🧠 낱말 찾기 4x4</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #f0f8ff; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: Arial, sans-serif; padding: 1rem; }
+.wrap { background: white; width: 320px; padding: 1.4rem 1.2rem; border-radius: 20px; box-shadow: 0 6px 24px rgba(0,0,0,0.12); }
+.ch-name { text-align: center; font-size: 13px; color: #999; margin-bottom: 4px; }
+.input-section { margin-top: 0.8rem; }
+.input-label { font-size: 13px; color: #555; font-weight: 700; margin-bottom: 4px; }
+.word-row { display: flex; gap: 6px; margin-bottom: 8px; }
+.word-field { flex: 1; padding: 10px 8px; font-size: 15px; border: 2px solid #87CEEB; border-radius: 10px; background: #F0F8FF; color: #111; outline: none; text-align: center; }
+.word-field:focus { border-color: #378ADD; }
+.make-btn { width: 100%; padding: 13px; font-size: 15px; font-weight: 700; border-radius: 12px; cursor: pointer; border: none; color: white; background: #378ADD; margin-top: 4px; }
+.quiz-section { display: none; }
+.direction { text-align: center; font-size: 12px; color: #87CEEB; font-weight: 600; margin-bottom: 12px; letter-spacing: 1px; }
+.grid { display: grid; grid-template-columns: repeat(4, 64px); grid-template-rows: repeat(4, 64px); margin: 0 auto; width: 256px; }
+.cell { width: 64px; height: 64px; border: 2.5px solid #87CEEB; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: #111; background: #F0F8FF; transition: background 0.5s, color 0.5s; }
+.cell.c1 { background: #378ADD; color: white; }
+.cell.c2 { background: #1D9E75; color: white; }
+.cell.c3 { background: #E24B4A; color: white; }
+.words { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-top: 12px; min-height: 34px; }
+.wtag { font-size: 14px; font-weight: 700; padding: 5px 14px; border-radius: 99px; }
+.wtag.c1 { background: #378ADD; color: white; }
+.wtag.c2 { background: #1D9E75; color: white; }
+.wtag.c3 { background: #E24B4A; color: white; }
+.msg { text-align: center; font-size: 13px; color: #1D9E75; font-weight: 700; min-height: 22px; margin-top: 8px; }
+.btn-row { display: flex; gap: 10px; margin-top: 12px; }
+.btn { flex: 1; padding: 13px; font-size: 14px; font-weight: 700; border-radius: 12px; cursor: pointer; border: none; color: white; }
+.btn.back { background: #888; }
+.btn.rev { background: #E24B4A; }
+.btn:disabled { background: #ccc; cursor: default; }
+.like-area { text-align: center; margin-top: 14px; padding-top: 12px; border-top: 2px solid #CCE8FF; }
+.like-btn { background: white; border: 2.5px solid #378ADD; border-radius: 99px; padding: 9px 28px; font-size: 18px; cursor: pointer; color: #378ADD; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; }
+.like-btn.on { background: #378ADD; color: white; }
+.like-lbl { font-size: 12px; color: #aaa; margin-top: 6px; }
+.error { color: #E24B4A; font-size: 13px; text-align: center; margin-top: 6px; min-height: 20px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="ch-name">🧠 치매예방 두뇌훈련</div>
+
+  <div class="input-section" id="inputSection">
+    <br>
+    <div class="input-label">단어 3개 입력 (2~3글자)</div>
+    <div class="word-row">
+      <input class="word-field" id="w1" placeholder="단어1" maxlength="3">
+      <input class="word-field" id="w2" placeholder="단어2" maxlength="3">
+      <input class="word-field" id="w3" placeholder="단어3" maxlength="3">
+    </div>
+    <div class="error" id="errMsg"></div>
+    <button class="make-btn" onclick="makeQuiz()">✨ 격자 만들기</button>
+  </div>
+
+  <div class="quiz-section" id="quizSection">
+    <div class="direction">→ 가로 &nbsp;|&nbsp; ↓ 세로 &nbsp;|&nbsp; ↘↙ 대각선</div>
+    <div class="grid" id="grid"></div>
+    <div class="words" id="tags"></div>
+    <div class="msg" id="msg"></div>
+    <div class="btn-row">
+      <button class="btn back" onclick="goBack()">← 다시 입력</button>
+      <button class="btn rev" id="rb" onclick="rev()">✨ 정답 공개</button>
+    </div>
+    <div class="like-area">
+      <button class="like-btn" id="lb" onclick="lk()">❤️ <span id="lc">0</span></button>
+      <div class="like-lbl">재밌었다면 하트를 눌러주세요!</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SIZE=4;
+const FILL=['나','가','다','라','마','바','사','아','자','차','카','타','파','하','나','가'];
+const C=['c1','c2','c3'],D=[[0,1],[1,0],[1,1],[1,-1]];
+let g=[],pl=[],done=false,liked=false,likeCount=0;
+const ri=n=>Math.floor(Math.random()*n),fc=()=>FILL[ri(FILL.length)];
+const gz=i=>[{rn:0,rx:1,cn:0,cx:1},{rn:0,rx:1,cn:2,cx:3},{rn:2,rx:3,cn:0,cx:1},{rn:2,rx:3,cn:2,cx:3}][i%4];
+
+function cp(gr,w,r,c,dr,dc){
+  for(let i=0;i<w.length;i++){
+    const nr=r+dr*i,nc=c+dc*i;
+    if(nr<0||nr>=SIZE||nc<0||nc>=SIZE)return false;
+    if(gr[nr][nc]!==''&&gr[nr][nc]!==w[i])return false;
+  }
+  return true;
+}
+
+function makeQuiz(){
+  const words=[
+    document.getElementById('w1').value.trim(),
+    document.getElementById('w2').value.trim(),
+    document.getElementById('w3').value.trim(),
+  ];
+  const err=document.getElementById('errMsg');
+  if(words.some(w=>!w)){err.textContent='단어 3개를 모두 입력해주세요!';return;}
+  if(words.some(w=>w.length<2||w.length>3)){err.textContent='단어는 2~3글자로 입력해주세요!';return;}
+  if(new Set(words).size!==3){err.textContent='단어 3개가 모두 달라야 해요!';return;}
+  err.textContent='';
+
+  done=false;liked=false;
+  g=[];
+  for(let r=0;r<SIZE;r++){g.push([]);for(let c=0;c<SIZE;c++)g[r].push('');}
+  pl=[];
+
+  const zo=[0,1,2,3].sort(()=>Math.random()-0.5);
+  for(let wi=0;wi<words.length;wi++){
+    const word=words[wi];let ok=false;
+    const z=gz(zo[wi]);
+    for(let a=0;a<400&&!ok;a++){
+      const [dr,dc]=D[ri(D.length)];
+      const r=z.rn+ri(z.rx-z.rn+1),c=z.cn+ri(z.cx-z.cn+1);
+      if(cp(g,word,r,c,dr,dc)){
+        const cs=[];
+        for(let i=0;i<word.length;i++){g[r+dr*i][c+dc*i]=word[i];cs.push([r+dr*i,c+dc*i]);}
+        pl.push({word,cs,col:C[wi%3]});ok=true;
+      }
+    }
+    if(!ok){
+      for(let a=0;a<400&&!ok;a++){
+        const [dr,dc]=D[ri(D.length)],r=ri(SIZE),c=ri(SIZE);
+        if(cp(g,word,r,c,dr,dc)){
+          const cs=[];
+          for(let i=0;i<word.length;i++){g[r+dr*i][c+dc*i]=word[i];cs.push([r+dr*i,c+dc*i]);}
+          pl.push({word,cs,col:C[wi%3]});ok=true;
+        }
+      }
+    }
+  }
+
+  for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){
+    if(!g[r][c]){
+      let ch,t=0;
+      do{ch=fc();t++;}
+      while(t<15&&((r>0&&g[r-1][c]===ch)||(c>0&&g[r][c-1]===ch)));
+      g[r][c]=ch;
+    }
+  }
+
+  document.getElementById('inputSection').style.display='none';
+  document.getElementById('quizSection').style.display='block';
+  document.getElementById('msg').textContent='';
+  document.getElementById('tags').innerHTML='';
+  document.getElementById('rb').disabled=false;
+  document.getElementById('lb').className='like-btn';
+  document.getElementById('lc').textContent='0';
+
+  const gr=document.getElementById('grid');gr.innerHTML='';
+  for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){
+    const d=document.createElement('div');
+    d.className='cell';d.id=`c${r}_${c}`;d.textContent=g[r][c];
+    gr.appendChild(d);
+  }
+}
+
+function rev(){
+  if(done)return;done=true;
+  document.getElementById('rb').disabled=true;
+  const tw=document.getElementById('tags');tw.innerHTML='';
+  pl.forEach(p=>{
+    p.cs.forEach(([r,c])=>document.getElementById(`c${r}_${c}`).classList.add(p.col));
+    const t=document.createElement('span');
+    t.className='wtag '+p.col;t.textContent=p.word;
+    tw.appendChild(t);
+  });
+  document.getElementById('msg').textContent='😊 몇 개 찾으셨나요? 하트 눌러주세요!';
+}
+
+function goBack(){
+  document.getElementById('quizSection').style.display='none';
+  document.getElementById('inputSection').style.display='block';
+}
+
+function lk(){
+  liked=!liked;
+  likeCount=liked?likeCount+1:Math.max(0,likeCount-1);
+  document.getElementById('lc').textContent=likeCount;
+  document.getElementById('lb').className='like-btn'+(liked?' on':'');
+  if(liked)document.getElementById('msg').textContent='❤️ 감사합니다! 구독도 눌러주세요 😊';
+}
+</script>
+</body>
+</html>
